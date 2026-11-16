@@ -1,0 +1,55 @@
+"workshopitem"
+{
+	"appid"		"4348910"
+	"publishedfileid"		"3832217636"
+	"contentfolder"		"D:/SteamLibrary/steamapps/common/Probably Stolen/Mods/profit_help"
+	"previewfile"		"D:/SteamLibrary/steamapps/common/Probably Stolen/Modding/profit_help/preview.png"
+	"title"		"利润助手 / Profit Helper"
+	"description"		"[h1]利润助手[/h1]
+顾客来买东西时，自动算出[b]在他的预算内能卖到的最高总价[/b]，把该卖的物品用白框标出来，还能一键（或自动）放上柜台。
+
+[h2]功能[/h2]
+[list]
+[*][b]最佳组合[/b]：在顾客预算内挑出总价最高的一组物品（不是简单挑最贵的），右上角面板显示预算、最多可得和清单
+[*][b]白框标记[/b]：推荐的物品直接在背包、展示柜、储藏舱里框出来
+[*][b]放上柜台[/b]：点一下按钮，推荐物品一件件放上柜台；也可以开启[b]自动放上[/b]，每位顾客到柜台时自动放；他买完一批、柜台空了而预算还有剩，会自动补下一批
+[*][b]翻遍所有容器[/b]：包、箱子、储藏舱里的东西也会算进去（带配件的枪、弹药盒、上锁的容器按整件算）
+[*][b]违禁品开关[/b]：可以选择推荐时包含或不卖违禁品；面板会显示这位顾客收不收违禁品，保安来了会提醒
+[*][b]假标签提醒[/b]：标出来比实际好、顾客又看不出来的物品，清单里标 [假标签] 并提醒；可选择卖或不卖假标签
+[*][b]赃物开关[/b]：可以选择卖或不卖赃物，不卖时赃物和装着赃物的容器不推荐、不加框、不自动放；清单里赃物标 [赃物]
+[*][b]橱窗开关[/b]：可以选择卖或不卖橱窗（展示柜）里的东西，不卖时橱窗里的物品不推荐、不加框、不自动放
+[*][b]按标签不卖[/b]：勾选物品标签（如弹药、医疗），带这些标签的物品不推荐、不加框、不自动放
+[*][b]禁售[/b]：右键物品 →「禁售」，这件物品（或装着它的容器）[b]放不上柜台[/b]，不推荐、不自动放，游戏里也卖不出去（已在柜台上的会被挪回背包）；给机器或容器禁售，里面装的所有东西也一起禁售；再点「取消禁售」恢复。禁售的物品右上角显示[b]红点[/b]。标记跟着物品存档。装了「店铺助手」时用它自带的禁售，不重复加，且它标的禁售同样会被排除
+[/list]
+
+[h2]价格算得准[/h2]
+价格按物品[b]放上柜台后[/b]的真实成交价计算，包括：
+[list]
+[*]零售加价、每日新闻涨价/降价
+[*]天赋（如糟糕的谈判者）、上流阶层小费、成瘾惩罚、香水
+[*]讨价还价的加价/打折/勒索/威胁
+[*]违禁品、管制品加价，黑市商人和食物银行等特殊顾客的折扣
+[*]顾客验货会揭穿的隐藏缺陷（清单里标出 [会被验出]）
+[*]其他 mod 通过 Harmony 加到柜台逻辑里的天赋效果
+[/list]
+
+[h2]操作[/h2]
+[list]
+[*]面板在游戏中一直显示，按 [b]F6[/b] 隐藏/显示（按键可以在游戏设置的「按键绑定」页里改）
+[*]面板上的按钮：放上柜台、违禁品 卖/不卖、橱窗 卖/不卖、假标签 卖/不卖、自动放上 开/关、赃物 卖/不卖、按标签不卖、选择标签
+[*]设置会保存，也可以在 Mods 菜单的设置里修改
+[/list]
+
+[h2]说明[/h2]
+[list]
+[*]适配游戏版本 0.46
+[*]不需要额外权限（不读写文件、不联网）
+[*]少数由其他 mod 的顾客回调实现的价格效果，要放上柜台后才会算准
+[/list]
+
+[hr][/hr]
+
+[h1]Profit Helper[/h1]
+When a customer comes to buy, finds the set of your items that earns the most within their budget (a real budget optimisation, not just the priciest items), frames them, lists them, and can put them on the counter for you, automatically if you like. Prices are the real counter prices: retail markup, daily news, perks, haggling, contraband markup, special customers, and what the customer will expose on inspection. Searches inside bags, cases and storage bays. Options to skip contraband, stolen goods or items with chosen tags. F6 hides the panel (rebindable in Settings > Key bindings). Game version 0.46."
+	"changenote"		"1.2：修复回到主菜单再读档后，物品和仓库都无法右键的问题；新增「赃物 卖/不卖」开关。1.1：隐藏面板的按键可以在游戏设置的「按键绑定」页里自定义（默认 F6）；自动放上会在同一位顾客买完一批、柜台空了后自动补下一批；新增右键「禁售」（禁售物品放不上柜台；机器或容器禁售时里面的东西也禁售；售货机、以物易物、整批出售都不会卖掉禁售物品；拆分或合并堆叠时禁售标记不会丢）；新增「橱窗 卖/不卖」开关；新增假标签提醒和「假标签 卖/不卖」开关；兼容店铺助手的禁售 / Fixed right-click not working after returning to the main menu and loading a save; new stolen-goods sell/keep toggle. Hide-panel key rebindable in Settings > Key bindings (default F6); auto-place now refills for the same customer after a sale empties the counter; new right-click 禁售 (do not sell; covers everything inside a marked machine or container); new showcase sell/keep toggle; fake-label warnings and a sell/keep toggle for them; honours Shop Assist's 禁售"
+}

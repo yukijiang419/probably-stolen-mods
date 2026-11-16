@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+
+# Unfinished experiment, not published
+save_anywhere/
+better_genes/

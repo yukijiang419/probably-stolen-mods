@@ -1,0 +1,33 @@
+"workshopitem"
+{
+	"appid"		"4348910"
+	"publishedfileid"		"3832937736"
+	"contentfolder"		"D:/SteamLibrary/steamapps/common/Probably Stolen/Mods/no_junk"
+	"previewfile"		"D:/SteamLibrary/steamapps/common/Probably Stolen/Modding/no_junk/preview.png"
+	"visibility"		"0"
+	"title"		"拾荒不捡垃圾 / No Junk Scavenging"
+	"description"		"[h1]拾荒不捡垃圾[/h1]
+去垃圾场拾荒时[b]不会再捡到垃圾[/b]，每次找到的东西都从其他掉落表里抽。
+
+[h2]功能[/h2]
+[list]
+[*]垃圾场拾荒时，游戏会先抽一张掉落表、再从表里抽物品；这个 mod 把[b]垃圾表[/b]的概率设为 0，其他表的比例保持不变
+[*]金属探测器、活动带来的「多捡一件」也同样不会出垃圾
+[*]其他额外掉落照常：背包、磁带、捕鼠器，带着螺丝刀/剪线钳/焊机时额外找到的螺母、电线、废金属
+[*]受伤、运气、拾荒次数等规则都不变
+[/list]
+
+[h2]说明[/h2]
+[list]
+[*]适配游戏版本 0.46
+[*]不需要额外权限（不读写文件、不联网）
+[*]出错时会自动退回原版掉落，不会让拾荒失效
+[*]随时可以开关，不影响存档
+[/list]
+
+[hr][/hr]
+
+[h1]No Junk Scavenging[/h1]
+Scavenging the dumping ground never turns up junk: the junk loot table is weighted to zero and every find comes from the other tables in their usual proportions. Extra finds from the metal scanner or events skip junk too; backpacks, cassettes, mouse traps and tool bonuses (nuts, wire, scrap metal) are unchanged. Falls back to the vanilla roll if anything goes wrong. Game version 0.46."
+	"changenote"		"1.0：首次发布 / First release"
+}
