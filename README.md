@@ -6,7 +6,7 @@
 |---|---|---|
 | [利润助手 / Profit Helper](profit_help) | 顾客来买东西时，在预算内算出总价最高的商品组合，框出来并可自动放上柜台 | [3832217636](https://steamcommunity.com/sharedfiles/filedetails/?id=3832217636) |
 | [物品复制 / Item Copy](item_copy) | 右键菜单加一项「复制」，完整复制物品（含特性、内容物） | [3832200801](https://steamcommunity.com/sharedfiles/filedetails/?id=3832200801) |
-| [拾荒不捡垃圾 / No Junk Scavenging](no_junk) | 垃圾场拾荒不再出垃圾，其他掉落比例不变 | — |
+| [拾荒不捡垃圾 / No Junk Scavenging](no_junk) | 垃圾场拾荒不再出垃圾，其他掉落比例不变 | [3832937736](https://steamcommunity.com/sharedfiles/filedetails/?id=3832937736) |
 
 ## 利润助手
 
