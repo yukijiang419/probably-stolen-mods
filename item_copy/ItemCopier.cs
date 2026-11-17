@@ -77,7 +77,23 @@ namespace item_copy
                 }
                 GeneralHelper.SetItemOwned(c, own: true);
             }
-            GraphUtils.EmporiumTryAdd(copy);
+            int units = copy.unitCount;
+            UnplacedWatch.Start();
+            try
+            {
+                GraphUtils.EmporiumTryAdd(copy);
+            }
+            finally
+            {
+                int lost = UnplacedWatch.Stop();
+                if (lost > 0)
+                {
+                    StoreUIManager.Instance?.Notify(lost >= units
+                        ? "复制失败：背包、柜台、展示柜都放不下了"
+                        : $"有 {lost} 个放不下，没有复制出来：背包、柜台、展示柜都满了", "sec");
+                    ModEntry.Instance.Log.Warning($"Copy of '{source.identifier}': {lost} of {units} unit(s) did not fit anywhere and were discarded by the game.");
+                }
+            }
             return copy;
         }
 

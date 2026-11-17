@@ -43,5 +43,5 @@
 
 [h1]Item Copy[/h1]
 Adds [b]Copy[/b] to every item's right-click menu. It makes an exact, owned copy of the item, including its features, condition and contents, and puts it in your inventory. Store fixtures (trash can, dossier, drain, faucet, cassette player) and hirelings cannot be copied. This is a cheat mod. Built for game version 0.46."
-	"changenote"		"1.5：修复和其他会重建右键菜单的 mod（如更多特质、联机类 mod）一起使用时，「复制」不显示或右键菜单失效的问题；每次打开右键菜单都会检查并补回「复制」 / Fixed the Copy row missing, or the right-click menu breaking, alongside mods that rebuild the menu; the row is now checked and restored every time the menu opens"
+	"changenote"		"1.5：修复和其他会重建右键菜单的 mod（如更多特质、联机类 mod）一起使用时，「复制」不显示或右键菜单失效的问题；每次打开右键菜单都会检查并补回「复制」；背包、柜台、展示柜都满时会提示复制失败，不再悄悄丢掉 / Fixed the Copy row missing, or the right-click menu breaking, alongside mods that rebuild the menu; the row is now checked and restored every time the menu opens; a copy that fits nowhere is now reported instead of silently discarded"
 }
