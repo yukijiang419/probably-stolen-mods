@@ -197,7 +197,7 @@ namespace item_copy
                 {
                     UnityEngine.Object.Destroy(button.handler.gameObject);
                     UnityEngine.Object.Destroy(grid.handler.gameObject);
-                    failed.Add(___contextWindow);
+                    CountFailure(___contextWindow);
                     ModEntry.Instance.Log.Warning("Context menu could not be detached; the copy row was not added.");
                     return;
                 }
@@ -220,6 +220,11 @@ namespace item_copy
             }
             catch (Exception e)
             {
+                // Counted first, so even a rollback that throws stops the retries after MaxFailures.
+                int count = CountFailure(___contextWindow);
+                ModEntry.Instance.Log.Error(count < MaxFailures
+                    ? "Could not add the copy row; it will be retried when the menu opens: " + e
+                    : $"Could not add the copy row ({count} times); it is turned off for this menu: " + e);
                 // Put the menu back exactly as it was.
                 try
                 {
@@ -233,7 +238,6 @@ namespace item_copy
                 ___contextWindow.Validate();
                 UnityEngine.Object.Destroy(button.handler.gameObject);
                 UnityEngine.Object.Destroy(grid.handler.gameObject);
-                ModEntry.Instance.Log.Error("Could not add the copy row: " + e);
             }
         }
 
@@ -262,6 +266,11 @@ namespace item_copy
         /// </summary>
         private static void GiveUp(PixelWindow window, string where, Exception e)
         {
+            if (window == null)
+            {
+                ModEntry.Instance.Log.Error($"The copy row failed in {where}: {e}");
+                return;
+            }
             // Hide the failed row before forgetting it, otherwise it remains visible but cannot be clicked.
             RichTextElement row = RowOf(window);
             if (row?.handler != null)
@@ -269,17 +278,22 @@ namespace item_copy
                 row.handler.gameObject.SetActive(false);
             }
             rows.Remove(window);
-            if (window == null)
-            {
-                ModEntry.Instance.Log.Error($"The copy row failed in {where}: {e}");
-                return;
-            }
-            failed.Add(window);
-            failures.TryGetValue(window, out int count);
-            failures[window] = ++count;
+            int count = CountFailure(window);
             ModEntry.Instance.Log.Error(count < MaxFailures
                 ? $"The copy row failed in {where}; it will be retried when the menu opens: {e}"
                 : $"The copy row failed in {where} {count} times and is turned off for this menu: {e}");
+        }
+
+        /// <summary>
+        /// Stops the per-frame repair for this window and counts the failure. The count is never reset:
+        /// a row that keeps breaking after being put back would otherwise be wrapped again forever.
+        /// </summary>
+        private static int CountFailure(PixelWindow window)
+        {
+            failed.Add(window);
+            failures.TryGetValue(window, out int count);
+            failures[window] = ++count;
+            return count;
         }
 
         [HarmonyPostfix]
