@@ -292,33 +292,110 @@ namespace profit_help
     {
         private const string MenuTag = "ContextMenuNode";
 
-        private static RichTextElement row;
+        /// <summary>
+        /// Our row, per menu window. The menu is built again whenever a handler initializes: loading a save
+        /// from the main menu rebuilds the scene, and other mods (multiplayer ones) create or re-initialize
+        /// handlers of their own. One shared button would then point at another menu's row, or at one
+        /// already destroyed, so every patch looks up the row of the window it is working on.
+        /// </summary>
+        private static readonly Dictionary<PixelWindow, RichTextElement> rowsByWindow = new Dictionary<PixelWindow, RichTextElement>();
 
         private static string Label(GameItem item)
         {
             return NoSale.IsMarked(item) ? "取消禁售" : "禁售";
         }
 
-        /// <summary>
-        /// Loading a save from the main menu rebuilds the scene and with it the menu. OnEventInit calls
-        /// ResetButtonColor before our postfix runs, so the row of the previous scene, already destroyed,
-        /// must be forgotten first: touching it would throw and leave the whole right-click handler dead.
-        /// </summary>
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(ItemContextHandler), "OnEventInit")]
-        private static void ForgetOldRow()
+        /// <summary>The live 禁售 row of this menu window, or null (none added, or destroyed with its scene).</summary>
+        private static RichTextElement RowOf(PixelWindow window)
         {
-            row = null;
+            if (window == null || !rowsByWindow.TryGetValue(window, out RichTextElement row))
+            {
+                return null;
+            }
+            if (row?.handler == null)
+            {
+                rowsByWindow.Remove(window);
+                return null;
+            }
+            return row;
         }
 
+        /// <summary>Menu windows our row was added to, so it can be put back when another mod takes it out.</summary>
+        private static readonly HashSet<PixelWindow> wanted = new HashSet<PixelWindow>();
+
+        /// <summary>Whether the row is still shown inside that window (another mod may have rebuilt its content).</summary>
+        private static bool IsInMenu(RichTextElement row, PixelWindow window)
+        {
+            return row?.handler != null && window?.handler != null && row.handler.transform.IsChildOf(window.handler.transform);
+        }
+
+        /// <summary>Forgets the rows of windows whose scene is gone.</summary>
+        private static void Prune()
+        {
+            var dead = new List<PixelWindow>();
+            foreach (KeyValuePair<PixelWindow, RichTextElement> pair in rowsByWindow)
+            {
+                if (pair.Key.handler == null || pair.Value?.handler == null)
+                {
+                    dead.Add(pair.Key);
+                }
+            }
+            foreach (PixelWindow window in dead)
+            {
+                rowsByWindow.Remove(window);
+            }
+            wanted.RemoveWhere(window => window.handler == null);
+        }
+
+        /// <summary>
+        /// Puts our row back if another mod replaced the menu's content after we wrapped it (some rebuild it
+        /// in their own OnEventInit postfix, others later). Runs right before the menu is laid out and shown.
+        /// </summary>
+        private static void EnsureRow(PixelWindow window, RenderHandler.ColorPalette disabledColor)
+        {
+            if (window == null || !wanted.Contains(window) || IsInMenu(RowOf(window), window))
+            {
+                return;
+            }
+            TryAddRow(window, disabledColor);
+        }
+
+        // Last of all OnEventInit postfixes: menu mods that rebuild the content (contextWindow.Attach of a
+        // grid of their own) run first, and our wrapper goes around whatever they built.
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
         [HarmonyPatch(typeof(ItemContextHandler), "OnEventInit")]
         private static void AddRow(PixelWindow ___contextWindow, RenderHandler.ColorPalette ___textDisabledColor)
         {
-            row = null;
+            // An exception escaping OnEventInit leaves the handler uninitialized: no right-click menu at all,
+            // vanilla rows included. Whatever goes wrong here must only cost our row.
+            try
+            {
+                TryAddRow(___contextWindow, ___textDisabledColor);
+            }
+            catch (Exception e)
+            {
+                ModEntry.Instance.Log.Error("Could not add the 禁售 row; the menu is left as the game built it: " + e);
+            }
+        }
+
+        private static void TryAddRow(PixelWindow ___contextWindow, RenderHandler.ColorPalette ___textDisabledColor)
+        {
+            Prune();
             if (ModLoader.IsModEnabled(NoSale.ShopAssistId))
             {
                 return;
+            }
+            RichTextElement existing = RowOf(___contextWindow);
+            if (existing != null)
+            {
+                if (IsInMenu(existing, ___contextWindow))
+                {
+                    return;
+                }
+                // Taken out of the menu by another mod: drop the stray row, a new one wraps the current content.
+                rowsByWindow.Remove(___contextWindow);
+                UnityEngine.Object.Destroy(existing.handler.gameObject);
             }
             PixelElement current = ___contextWindow?.childElement;
             if (current == null || !___contextWindow.Detach(current))
@@ -343,7 +420,11 @@ namespace profit_help
                     t.gameObject.tag = MenuTag;
                 }
                 ___contextWindow.Validate();
-                row = button;
+                rowsByWindow[___contextWindow] = button;
+                if (!wanted.Add(___contextWindow))
+                {
+                    ModEntry.Instance.Log.Log("禁售 row added again: another mod had rebuilt the right-click menu.");
+                }
             }
             catch (Exception e)
             {
@@ -357,34 +438,41 @@ namespace profit_help
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemContextHandler), "ResetButtonColor")]
-        private static void ResetColor(GameItem ___currentItem, RenderHandler.ColorPalette ___textDisabledColor)
+        private static void ResetColor(PixelWindow ___contextWindow, GameItem ___currentItem, RenderHandler.ColorPalette ___textDisabledColor)
         {
+            RichTextElement row = RowOf(___contextWindow);
+            if (row == null)
+            {
+                return;
+            }
             try
             {
-                row?.SetText(Label(___currentItem), 10000, ___textDisabledColor);
+                row.SetText(Label(___currentItem), 10000, ___textDisabledColor);
             }
             catch (Exception e)
             {
-                GiveUp("ResetButtonColor", e);
+                GiveUp(___contextWindow, "ResetButtonColor", e);
             }
         }
 
         /// <summary>
         /// Our postfixes run inside the game's right-click handling: an exception escaping one of them would
-        /// stop the whole menu from opening. Drop our row instead and log why, once.
+        /// stop the whole menu from opening. Drop our row of that menu instead and log why.
         /// </summary>
-        private static void GiveUp(string where, Exception e)
+        private static void GiveUp(PixelWindow window, string where, Exception e)
         {
-            row = null;
-            ModEntry.Instance.Log.Error($"The 禁售 row failed in {where} and is turned off until the next load: {e}");
+            rowsByWindow.Remove(window);
+            wanted.Remove(window);
+            ModEntry.Instance.Log.Error($"The 禁售 row failed in {where} and is turned off for this menu: {e}");
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemContextHandler), "UpdateSelectButtonColor")]
-        private static void UpdateColor(RichTextElement selectedButton, GameItem ___currentItem,
+        private static void UpdateColor(RichTextElement selectedButton, GameItem ___currentItem, PixelWindow ___contextWindow,
             RenderHandler.ColorPalette ___textColor, RenderHandler.ColorPalette ___textDisabledColor,
             RenderHandler.ColorPalette ___textSelectColor, RenderHandler.ColorPalette ___textSelectDisabledColor)
         {
+            RichTextElement row = RowOf(___contextWindow);
             if (row == null || ___currentItem == null)
             {
                 return;
@@ -399,16 +487,27 @@ namespace profit_help
             }
             catch (Exception e)
             {
-                GiveUp("UpdateSelectButtonColor", e);
+                GiveUp(___contextWindow, "UpdateSelectButtonColor", e);
             }
         }
 
         /// <summary>Same width for every visible row, including rows other mods added.</summary>
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
         [HarmonyPatch(typeof(ItemContextHandler), "EqualizeButtonWidths")]
-        private static void EqualizeWidth(PixelWindow ___contextWindow)
+        private static void EqualizeWidth(PixelWindow ___contextWindow, RenderHandler.ColorPalette ___textDisabledColor)
         {
-            if (row == null || ___contextWindow?.handler == null)
+            // The game calls this on every right-click, just before laying the menu out and showing it.
+            try
+            {
+                EnsureRow(___contextWindow, ___textDisabledColor);
+            }
+            catch (Exception e)
+            {
+                GiveUp(___contextWindow, "EnsureRow", e);
+            }
+            RichTextElement row = RowOf(___contextWindow);
+            if (row == null || ___contextWindow.handler == null)
             {
                 return;
             }
@@ -436,14 +535,16 @@ namespace profit_help
             }
             catch (Exception e)
             {
-                GiveUp("EqualizeButtonWidths", e);
+                GiveUp(___contextWindow, "EqualizeButtonWidths", e);
             }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ItemContextHandler), "TriggerButton")]
-        private static bool OnClick(ItemContextHandler __instance, RichTextElement button, GameItem ___currentItem, GameGridInventory ___currentInventory)
+        private static bool OnClick(ItemContextHandler __instance, RichTextElement button, GameItem ___currentItem,
+            GameGridInventory ___currentInventory, PixelWindow ___contextWindow)
         {
+            RichTextElement row = RowOf(___contextWindow);
             if (row == null || button != row)
             {
                 return true;

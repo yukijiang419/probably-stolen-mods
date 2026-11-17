@@ -3,7 +3,7 @@
   <ID>Profit_helper</ID>
   <Name>利润助手 / Profit Helper</Name>
   <Author>Yuki</Author>
-  <ModVersion>1.2</ModVersion>
+  <ModVersion>1.4</ModVersion>
   <Description>For a buying customer, finds the set of your items that earns the most within their budget, frames them and can put them on the counter for you.</Description>
   <GameVersions>
     <Version>0.46</Version>

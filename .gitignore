@@ -6,3 +6,6 @@ obj/
 # Unfinished experiment, not published
 save_anywhere/
 better_genes/
+menu_rebuild_test/
+_item_copy_local_backup/
+dist/

@@ -3,7 +3,7 @@
   <ID>item_copy</ID>
   <Name>物品复制</Name>
   <Author>Yuki</Author>
-  <ModVersion>1.3</ModVersion>
+  <ModVersion>1.5</ModVersion>
   <Description>Adds "复制" to every item's right-click menu: makes an exact, owned copy of the item (features, contents, condition) in your inventory.</Description>
   <GameVersions>
     <Version>0.46</Version>
